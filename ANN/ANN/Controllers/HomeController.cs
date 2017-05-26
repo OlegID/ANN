@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ANN.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -10,6 +11,15 @@ namespace ANN.Controllers
     {
         public ActionResult Index()
         {
+            //var n = new NeuronNetwork(1);
+            //FillCourses.DownloadCorses();
+            DateTime date = new DateTime(2002, 1, 1);
+            int i = 1;
+            while (date.Day != DateTime.Today.Day || date.Month != DateTime.Today.Month || date.Year != DateTime.Today.Year)
+            {
+                i++;
+                date = date.AddDays(1);
+            }
             return View();
         }
 
