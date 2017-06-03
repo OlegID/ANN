@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -66,12 +67,48 @@ namespace ANN.Models
 
         public static void DownloadCorses()
         {
-            db.Database.ExecuteSqlCommand("DELETE FROM coursecurrency");
-            DateTime date = new DateTime(2002, 1,1);
-            while (date.Day != DateTime.Today.Day || date.Month != DateTime.Today.Month || date.Year != DateTime.Today.Year)
+            //db.Database.ExecuteSqlCommand("DELETE FROM coursecurrency");
+            int m = 2;
+            DateTime first = new DateTime(2002, 1, 1);
+            while (first.Day < DateTime.Today.Day || first.Month < DateTime.Today.Month || first.Year < DateTime.Today.Year)
+            {
+                m++;
+                first = first.AddDays(1);
+            }
+            var corses = db.coursecurrency.ToArray();
+            DateTime date = corses.Last().datecourse.Value; 
+            while (date.Day < DateTime.Today.Day || date.Month < DateTime.Today.Month || date.Year < DateTime.Today.Year)
             {
                 Fill(date);
                 date = date.AddDays(1);
+            }
+            corses = db.coursecurrency.ToArray();
+            Dictionary<string, int> dict = new Dictionary<string, int>();
+            int a;
+            for(int i = 0; i < corses.Length; i++)
+            {
+                if(dict.ContainsKey(corses[i].namecurrency))
+                {
+                    dict.TryGetValue(corses[i].namecurrency,out a);
+                    dict.Remove(corses[i].namecurrency);
+                    a++;
+                    dict.Add(corses[i].namecurrency, a);
+                }
+                else
+                {
+                    dict.Add(corses[i].namecurrency, 1);
+                }
+            }
+            ICollection<string> keys = dict.Keys;
+            List<string> list = keys.ToList();
+            foreach(var item in list)
+            {
+                dict.TryGetValue(item, out a);
+                if(a < m)
+                {
+                    dict.Remove(item);
+                    db.Database.ExecuteSqlCommand("DELETE FROM coursecurrency WHERE namecurrency = @name", new NpgsqlParameter("@name", item));
+                }
             }
         }
     }

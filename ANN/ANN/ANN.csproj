@@ -65,6 +65,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.1.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -184,7 +185,6 @@
     </Compile>
     <Compile Include="Models\FillCourses.cs" />
     <Compile Include="Models\FillNeuron.cs" />
-    <Compile Include="Models\ILayer.cs" />
     <Compile Include="Models\Layer.cs" />
     <Compile Include="Models\Neuron.cs" />
     <Compile Include="Models\NeuronNetwork.cs" />

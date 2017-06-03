@@ -13,7 +13,7 @@ namespace ANN.Models
         public override double Calculate(double[] input)
         {
             double sum = 0;
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 125; i++)
             {
                 sum += weights[i] * input[i];
             }

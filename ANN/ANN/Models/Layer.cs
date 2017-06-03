@@ -13,7 +13,7 @@ using NpgsqlTypes;
 
 namespace ANN.Models
 {
-    public class Layer : ILayer
+    public class Layer
     {
 
         private static ANNDBEntities1 db = new ANNDBEntities1();
@@ -24,15 +24,21 @@ namespace ANN.Models
 
         public double[] Output { get; private set; }
 
+        public int State { get; private set; }
+
         public Layer(int n)
         {
+            State = 0;
             neuronsOfLayer = new List<Neuron>();
             number = n;
+            Output = new double[125];
             var list = db.neuron.Where(a => a.layer == number).ToList(); 
             if(list.Count() < 125)
             {
+                State = 1;
                 FillNeuron.Filling();
             }
+            State = 2;
             list = db.neuron.Where(a => a.layer == number).ToList();
             foreach (var neuron in list)
             {
@@ -46,6 +52,10 @@ namespace ANN.Models
             for (int i = 0; i < 125; i++)
             {
                 Output[i] = neuronsOfLayer[i].Calculate(input);
+                if(double.IsNaN(Output[i]) || double.IsNaN(input[i]))
+                {
+                    new object();
+                }
             }
         }
 
@@ -63,8 +73,8 @@ namespace ANN.Models
                 {
                     db.Database.ExecuteSqlCommand("UPDATE neuron SET weight = @weight, layer = @layer WHERE neuron_id = @id",
                                                     new object[] {
-                                                    new NpgsqlParameter("id",(number - 1) * 125 + i),
-                                                    new NpgsqlParameter {ParameterName = "weihgt",
+                                                    new NpgsqlParameter("id",(number - 1) * 125 + i + 1),
+                                                    new NpgsqlParameter {ParameterName = "weight",
                                                                         NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Double,
                                                                         Value = neuronsOfLayer[i].weights },
                                                     new NpgsqlParameter("layer", number)});

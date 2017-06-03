@@ -13,7 +13,6 @@ namespace ANN.Models
 {
     public class NeuronNetwork
     {
-        
 
         private List<Layer> layersList;
 
@@ -27,15 +26,41 @@ namespace ANN.Models
 
         private double coof;
 
+        private bool state;
+
         public NeuronNetwork(double coof)
         {
-            layersList = new List<Layer>();
             this.coof = coof;
+            state = false;
+            while(!state)
+            {
+                Load();
+            }
+        }
+
+        private void Load()
+        {
+            layersList = new List<Layer>();
             for(int i = 1; i <= 4; i++)
             {
                 layersList.Add(new Layer(i));
+                while(layersList[i - 1].State != 2)
+                {
+                    if(layersList[i - 1].State == 1)
+                    {
+                        return;
+                    }
+                }
             }
             outputLayer = new OutputLayer(5);
+            while(outputLayer.State != 2)
+            {
+                if(outputLayer.State == 1)
+                {
+                    return;
+                }
+            }
+            state = true;
         }
 
         public double Calculate(double[] input)
@@ -44,8 +69,9 @@ namespace ANN.Models
             foreach(Layer layer in layersList)
             {
                 layer.Calculate(this.input);
-                input = layer.Output;
+                this.input = layer.Output;
             }
+            outputLayer.Calculate(this.input);
             Output = outputLayer.Output;
             return Output;
         }
@@ -57,6 +83,7 @@ namespace ANN.Models
             {
                 layer.Learning(misstake,coof);
             }
+            outputLayer.Learning(misstake, coof);
         }
 
         public void SaveWeights()
