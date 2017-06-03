@@ -15,34 +15,13 @@ namespace ANN.Controllers
 
 
         NeuronNetwork n = new NeuronNetwork(0.001);
+        double[] inp = new double[5500];
+        int state = 0;
 
-        public ActionResult Index()
+        public void Prepare()
         {
-            FillCourses.DownloadCorses();
-
-            return View();
-        }
-
-        public ActionResult About()
-        {
-            ViewBag.Message = "Your application description page.";
-
-            return View();
-        }
-
-        public ActionResult Contact()
-        {
-            ViewBag.Message = "Your contact page.";
-
-            return View();
-        }
-
-        public void LearnNetwork()
-        {
-            Random rand = new Random();
-            double[] inp = new double[5126];
             DateTime date = new DateTime(2002, 1, 1);
-            for (int j = 0; j < 5126; j++)
+            for (int j = 0; j < 5500; j++)
             {
                 inp[j] = (double)db.Database.SqlQuery<decimal>("SELECT course FROM coursecurrency WHERE coursecurrency.namecurrency = @name AND coursecurrency.datecourse = @date", new object[] {
                                                     new NpgsqlParameter("name","USD"),
@@ -54,7 +33,50 @@ namespace ANN.Controllers
                                                     }}).ToArray().First();
                 date = date.AddDays(1);
             }
-            for (int i = 0; i < 100000; i++)
+        }
+
+        public ActionResult Index()
+        {
+            FillCourses.DownloadCorses();
+            Prepare();
+            var corses = db.coursecurrency.ToArray();
+            List<string> list = new List<string>();
+            for(int i = 0; i < corses.Length; i++)
+            {
+                if (!list.Contains(corses[i].namecurrency))
+                {
+                    list.Add(corses[i].namecurrency);
+                }
+            }
+            ViewBag.CourseList = new SelectList(list);
+            return View();
+        }
+
+        public ActionResult Result(string courseName)
+        {
+            double[] inp = new double[125];
+            DateTime date = DateTime.Today;
+            for(int i = 0; i < 125; i++)
+            {
+                inp[i] = (double)db.coursecurrency.Where(c => c.namecurrency.ToLower().Equals(courseName.ToLower()) && c.datecourse == date).ToArray().First().course;
+                date = date.AddDays(-1);
+            }
+            n.Calculate(inp);
+            ViewBag.Result = n.Output;
+            ViewBag.Day = inp[124];
+            return View();
+        }
+
+        public ActionResult Learn()
+        {
+            LearnNetwork();
+            return View();
+        }
+
+        public void LearnNetwork()
+        {
+            Random rand = new Random();
+            for (int i = 0; i < 1000; i++)
             {
                 int m = rand.Next(0, 5000);
                 double[] inpu = new double[125];
@@ -74,4 +96,6 @@ namespace ANN.Controllers
             n.SaveWeights();
         }
     }
+
+    
 }
