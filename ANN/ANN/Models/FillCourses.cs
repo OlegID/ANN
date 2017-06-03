@@ -67,6 +67,7 @@ namespace ANN.Models
 
         public static void DownloadCorses()
         {
+            //db.Database.ExecuteSqlCommand("DELETE FROM coursecurrency");
             int m = 2;
             DateTime first = new DateTime(2002, 1, 1);
             while (first.Day < DateTime.Today.Day || first.Month < DateTime.Today.Month || first.Year < DateTime.Today.Year)
